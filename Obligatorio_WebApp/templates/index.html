@@ -1,53 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Web App TSP</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Efecto de carga -->
+    <div id="loadingDiv" class="loading">
+      <div class="spinner"></div>
+    </div>
 
-<div class="container">
-    <h1>Travelling Salesman Problem (TSP)</h1>
-    
-    <h2>Selecciona las ciudades</h2>
-    <div id="citiesSelection">
+    <div class="container">
+      <h1>Travelling Salesman Problem (TSP)</h1>
+
+      <h2>Selecciona las ciudades</h2>
+      <div id="citiesSelection">
         <!-- Las opciones de ciudades se llenarán dinámicamente desde JavaScript -->
-    </div>
-    
-    <div class="button-container">
+      </div>
+
+      <div class="button-container">
         <button onclick="generarMatriz()">Generar Matriz</button>
-    </div>
+      </div>
 
-    <!-- Añadir un contenedor para el título de la matriz y ocultarlo inicialmente -->
-    <h3 id="matrixTitle" style="display: none;">Matriz de Distancias:</h3>
+      <!-- Añadir un contenedor para el título de la matriz y ocultarlo inicialmente -->
+      <h3 id="matrixTitle" style="display: none">Matriz de Distancias:</h3>
 
-    <!-- Agrega un contenedor para la matriz -->
-    <div class="matrix-wrapper" id="matrixContainer"></div>
+      <!-- Agrega un contenedor para la matriz -->
+      <div class="matrix-wrapper" id="matrixContainer"></div>
 
-    <!-- Añadir contenedor para la selección de algoritmo y botón "Generar Mapa", ocultos inicialmente -->
-    <div id="seleccionAlgoritmo" style="display: none;">
+      <!-- Añadir contenedor para la selección de algoritmo y botón "Generar Mapa", ocultos inicialmente -->
+      <div id="seleccionAlgoritmo" style="display: none">
         <h2>Selecciona el algoritmo</h2>
         <center>
-            <select id="opcionMapa">
-                <option value="opcion1">Algoritmo Vecino Mas Cercano</option>
-                <option value="opcion2">Algoritmo 2</option>
-                <option value="opcion3">Algoritmo 3</option>
-                <option value="opcion4">Algoritmo 4</option>
-            </select>
+          <select id="opcionMapa">
+            <option value="opcion1">Algoritmo Vecino Mas Cercano</option>
+            <option value="opcion2">Algoritmo 2</option>
+            <option value="opcion3">Algoritmo 3</option>
+            <option value="opcion4">Algoritmo 4</option>
+          </select>
         </center>
         <button onclick="generarMapa()">Generar Mapa</button>
-    </div>
+      </div>
 
-    <div id="resultadoAlgoritmo" style="display: none;">
+      <div id="resultadoAlgoritmo" style="display: none">
         <h2>Resultado del Algoritmo:</h2>
         <p id="caminoResultado"></p>
         <p id="distanciaResultado"></p>
         <!-- Aquí se mostrará el mapa en un iframe -->
+      </div>
     </div>
-</div>
 
-<script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
 </html>
