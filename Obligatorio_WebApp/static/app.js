@@ -36,7 +36,7 @@ function generarMatriz() {
     });
 
   // Mostrar el efecto de carga
-  mostrarSpinner();
+  mostrarSpinnerMatrix();
 
   fetch("/seleccionar-ciudades", {
     method: "POST",
@@ -47,12 +47,12 @@ function generarMatriz() {
   })
     .then((respuesta) => respuesta.json())
     .then((datos) => {
-      ocultarSpinner();
+      ocultarSpinnerMatrix();
       mostrarMatriz(datos.matrix, datos.selectedCities);
     })
     .catch((error) => {
       // Ocultar el efecto de carga en caso de error
-      ocultarSpinner();
+      ocultarSpinnerMatrix();
       console.error("Error al obtener datos:", error);
     });
 }
@@ -89,7 +89,7 @@ function generarMapa() {
   const algoritmoSeleccionado = document.getElementById("opcionMapa").value;
   if (algoritmoSeleccionado === "opcion1") {
     // Mostrar el efecto de carga
-    mostrarSpinner();
+    mostrarSpinnerMap();
 
     fetch("/algoritmo-vecino-cercano")
       .then((respuesta) => {
@@ -103,7 +103,7 @@ function generarMapa() {
           console.error("Error del servidor:", datos.error);
           return;
         }
-        ocultarSpinner();
+        ocultarSpinnerMap();
 
         // Mostrar el camino y la distancia total en la consola
         console.log("Camino:", datos.camino);
@@ -132,18 +132,38 @@ function generarMapa() {
         document.getElementById("resultadoAlgoritmo").appendChild(iframe);
       })
       .catch((error) => {
-        ocultarSpinner();
+        ocultarSpinnerMap();
         console.error("Error al obtener datos:", error);
       });
   }
 }
 
-function mostrarSpinner() {
-  const loadingDiv = document.getElementById("loadingDiv");
-  loadingDiv.style.setProperty("display", "flex", "important");
+// function mostrarSpinner() {
+//   const loadingDiv = document.getElementById("loadingDiv");
+//   loadingDiv.style.setProperty("display", "flex", "important");
+// }
+
+// function ocultarSpinner() {
+//   const loadingDiv = document.getElementById("loadingDiv");
+//   loadingDiv.style.setProperty("display", "none", "important");
+// }
+
+function mostrarSpinnerMap() {
+  const loadingMap = document.getElementById("loadingMap");
+  loadingMap.style.setProperty("display", "flex", "important");
 }
 
-function ocultarSpinner() {
-  const loadingDiv = document.getElementById("loadingDiv");
-  loadingDiv.style.setProperty("display", "none", "important");
+function ocultarSpinnerMap() {
+  const loadingMap = document.getElementById("loadingMap");
+  loadingMap.style.setProperty("display", "none", "important");
+}
+
+function mostrarSpinnerMatrix() {
+  const loadingMatrix = document.getElementById("loadingMatrix");
+  loadingMatrix.style.setProperty("display", "flex", "important");
+}
+
+function ocultarSpinnerMatrix() {
+  const loadingMatrix = document.getElementById("loadingMatrix");
+  loadingMatrix.style.setProperty("display", "none", "important");
 }
