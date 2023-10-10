@@ -2,11 +2,15 @@ from flask import Flask, render_template, jsonify, request
 import requests
 import folium
 from flask import send_from_directory
+import itertools
+import math
 
 app = Flask(__name__)
 
 ciudadesAUtilizar = []
 matrizDistanciasGlobal = []
+
+# --------------------- FUNCIONES DE COORDENADAS Y DISTANCIAS ---------------------
 
 # Función para obtener las coordenadas de las ciudades
 def obtener_coordenadas(ciudad):
@@ -41,7 +45,6 @@ def es_ciudad_en_uruguay(display_name):
     pais = name[-1].strip()
     return pais == "Uruguay"
 
-
 def obtener_distancia_osrm(coord1, coord2):
 
     base_url = "http://router.project-osrm.org/route/v1/driving"
@@ -63,36 +66,33 @@ def obtener_distancia_osrm(coord1, coord2):
     # Devuelve la distancia en kilómetros
     return distancia_en_kilometros
 
-def vecino_mas_cercano_matriz(matriz_distancias):
-    n = len(matriz_distancias)
-    visitados = [False] * n
-    camino = []
-    total_distancia = 0
+def calcular_distancia(ciudad1, ciudad2, matriz_distancias):
+    return matriz_distancias[ciudad1][ciudad2]
 
-    actual = 0
-    camino.append(actual)
-    visitados[actual] = True
+# --------------------- ALGORITMO DEL VIAJERO ---------------------
 
-    for _ in range(n - 1):
-        min_distancia = float('inf')
-        siguiente = None
+def calcular_longitud_ruta(ruta, matriz_distancias):
+    longitud = 0
+    for i in range(len(ruta) - 1):
+        longitud += calcular_distancia(ruta[i], ruta[i + 1], matriz_distancias)
+    longitud += calcular_distancia(ruta[-1], ruta[0], matriz_distancias)  # Volver al punto de inicio
+    return longitud
 
-        for j in range(n):
-            if not visitados[j]:
-                d = matriz_distancias[actual][j]
-                if d < min_distancia:
-                    min_distancia = d
-                    siguiente = j
+def algoritmo_del_viajero(matriz_distancias):
+    num_ciudades = len(matriz_distancias)
+    mejor_ruta = None
+    mejor_longitud = float('inf')
+    todas_rutas = list(itertools.permutations(range(num_ciudades)))
 
-        actual = siguiente
-        camino.append(actual)
-        visitados[actual] = True
-        total_distancia += min_distancia
+    for ruta in todas_rutas:
+        longitud = calcular_longitud_ruta(ruta, matriz_distancias)
+        if longitud < mejor_longitud:
+            mejor_longitud = longitud
+            mejor_ruta = ruta
 
-    total_distancia += matriz_distancias[actual][0]
-    camino.append(camino[0])
+    return mejor_ruta, mejor_longitud
 
-    return camino, total_distancia
+# --------------------- FUNCIONES DE MAPA ---------------------
 
 def generar_mapa(camino, coordenadasCiudades):
     m = folium.Map(location=[-32.5, -56], zoom_start=7)
@@ -111,6 +111,7 @@ def generar_mapa(camino, coordenadasCiudades):
     m.save(map_path)
     return map_path
 
+# --------------------- RUTAS DE FLASK ---------------------
 
 @app.route('/')
 def inicio():
@@ -154,11 +155,11 @@ def seleccionarCiudades():
         "matrix": matrizDistancias
     })
 
-@app.route('/algoritmo-vecino-cercano', methods=['GET'])
-def algoritmo_vecino_cercano():
+@app.route('/algoritmo-del-viajero', methods=['GET'])
+def algoritmo_del_viajero_app():
     try:
         global ciudadesAUtilizar, matrizDistanciasGlobal
-        camino, distanciaTotal = vecino_mas_cercano_matriz(matrizDistanciasGlobal)
+        camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
         map_path = generar_mapa(camino, coordenadasCiudades)
         return jsonify({

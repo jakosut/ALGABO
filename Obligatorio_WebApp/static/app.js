@@ -91,7 +91,7 @@ function generarMapa() {
     // Mostrar el efecto de carga
     mostrarSpinnerMap();
 
-    fetch("/algoritmo-vecino-cercano")
+    fetch("/algoritmo-del-viajero")
       .then((respuesta) => {
         if (!respuesta.ok) {
           throw new Error("Error en el servidor");
