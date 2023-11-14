@@ -4,6 +4,8 @@ import folium
 from flask import send_from_directory
 import itertools
 import math
+import random
+
 
 app = Flask(__name__)
 
@@ -94,8 +96,6 @@ def algoritmo_del_viajero(matriz_distancias):
 
 # --------------------- ALGORITMO Aleatorio ---------------------
 
-import random
-
 def tsp_aleatorio(distancias):
     ciudades = list(range(len(distancias)))
     random.shuffle(ciudades)
@@ -117,7 +117,7 @@ def tsp_aleatorio(distancias):
     camino.append(ciudad_final)
 
     return camino, costo_total
-#   Este algoritmo simplemente permuta aleatoriamente las ciudades y calcula el costo total del recorrido. 
+#  Este algoritmo simplemente permuta aleatoriamente las ciudades y calcula el costo total del recorrido. 
 # Debido a su enfoque aleatorio, no garantiza una solución óptima en absoluto y 
 # generalmente producirá soluciones muy subóptimas para instancias más grandes del problema del TSP. 
 # Es importante destacar que este algoritmo no es una solución viable para resolver el TSP en la práctica, pero puede servir como un ejemplo de un enfoque no efectivo.
@@ -134,21 +134,6 @@ def tsp_secuencial(distancias):
     # Incluir el costo de volver a la ciudad inicial
     costo_total += distancias[camino[-1]][camino[0]]
     return camino, costo_total
-
-@app.route('/algoritmo-secuencial', methods=['GET'])
-def algoritmo_secuencial_app():
-    try:
-        global ciudadesAUtilizar, matrizDistanciasGlobal
-        camino, distanciaTotal = tsp_secuencial(matrizDistanciasGlobal)
-        coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades)
-        return jsonify({
-            "camino": [ciudadesAUtilizar[i] for i in camino],
-            "distanciaTotal": distanciaTotal,
-            "mapPath": map_path
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # Recorre las ciudades en el sentido que se van marcando   
 # -------------------------------------------------------------------
@@ -220,6 +205,36 @@ def algoritmo_del_viajero_app():
     try:
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
+        coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
+        map_path = generar_mapa(camino, coordenadasCiudades)
+        return jsonify({
+            "camino": [ciudadesAUtilizar[i] for i in camino],
+            "distanciaTotal": distanciaTotal,
+            "mapPath": map_path
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/algoritmo-aleatorio', methods=['GET'])
+def algoritmo_aleatorio_app():
+    try:
+        global ciudadesAUtilizar, matrizDistanciasGlobal
+        camino, distanciaTotal = tsp_aleatorio(matrizDistanciasGlobal)
+        coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
+        map_path = generar_mapa(camino, coordenadasCiudades)
+        return jsonify({
+            "camino": [ciudadesAUtilizar[i] for i in camino],
+            "distanciaTotal": distanciaTotal,
+            "mapPath": map_path
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/algoritmo-secuencial', methods=['GET'])
+def algoritmo_secuencial_app():
+    try:
+        global ciudadesAUtilizar, matrizDistanciasGlobal
+        camino, distanciaTotal = tsp_secuencial(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
         map_path = generar_mapa(camino, coordenadasCiudades)
         return jsonify({

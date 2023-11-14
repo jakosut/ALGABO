@@ -87,66 +87,66 @@ function mostrarMatriz(matriz, ciudadesSeleccionadas) {
 
 function generarMapa() {
   const algoritmoSeleccionado = document.getElementById("opcionMapa").value;
-  if (algoritmoSeleccionado === "opcion1") {
-    // Mostrar el efecto de carga
-    mostrarSpinnerMap();
-
-    fetch("/algoritmo-del-viajero")
-      .then((respuesta) => {
-        if (!respuesta.ok) {
-          throw new Error("Error en el servidor");
-        }
-        return respuesta.json();
-      })
-      .then((datos) => {
-        if (datos.error) {
-          console.error("Error del servidor:", datos.error);
-          return;
-        }
-        ocultarSpinnerMap();
-
-        // Mostrar el camino y la distancia total en la consola
-        console.log("Camino:", datos.camino);
-        console.log("Distancia total:", datos.distanciaTotal);
-
-        // Mostrar el camino y la distancia total en la web
-        document.getElementById("caminoResultado").innerText =
-          "Camino: " + datos.camino.join(" -> ");
-        document.getElementById("distanciaResultado").innerText =
-          "Distancia total: " + datos.distanciaTotal.toFixed(2) + " km";
-        document.getElementById("resultadoAlgoritmo").style.display = "block";
-
-        // Eliminar el iframe existente, si hay alguno
-        const existingIframe = document.querySelector(
-          "#resultadoAlgoritmo iframe"
-        );
-        if (existingIframe) {
-          existingIframe.remove();
-        }
-
-        // Mostrar el mapa en un nuevo iframe
-        const iframe = document.createElement("iframe");
-        iframe.src = datos.mapPath;
-        iframe.width = "100%";
-        iframe.height = "600px";
-        document.getElementById("resultadoAlgoritmo").appendChild(iframe);
-      })
-      .catch((error) => {
-        ocultarSpinnerMap();
-        console.error("Error al obtener datos:", error);
-      });
+  let url = "";
+  
+  switch (algoritmoSeleccionado) {
+    case "opcion1":
+      url = "/algoritmo-del-viajero";
+      break;
+    case "opcion2":
+      url = "/algoritmo-aleatorio";
+      break;
+    case "opcion3":
+      url = "/algoritmo-secuencial";
+      break;
+    default:
+      console.error("Algoritmo no seleccionado");
+      return;
   }
+
+  // Mostrar el efecto de carga
+  mostrarSpinnerMap();
+
+  fetch(url)
+    .then((respuesta) => {
+      if (!respuesta.ok) {
+        throw new Error("Error en el servidor");
+      }
+      return respuesta.json();
+    })
+    .then((datos) => {
+      if (datos.error) {
+        console.error("Error del servidor:", datos.error);
+        return;
+      }
+      ocultarSpinnerMap();
+
+      // Mostrar el camino y la distancia total en la consola y en la web
+      console.log("Camino:", datos.camino);
+      console.log("Distancia total:", datos.distanciaTotal);
+      document.getElementById("caminoResultado").innerText = "Camino: " + datos.camino.join(" -> ");
+      document.getElementById("distanciaResultado").innerText = "Distancia total: " + datos.distanciaTotal.toFixed(2) + " km";
+      document.getElementById("resultadoAlgoritmo").style.display = "block";
+
+      // Eliminar el iframe existente, si hay alguno
+      const existingIframe = document.querySelector("#resultadoAlgoritmo iframe");
+      if (existingIframe) {
+        existingIframe.remove();
+      }
+
+      // Mostrar el mapa en un nuevo iframe
+      const iframe = document.createElement("iframe");
+      iframe.src = datos.mapPath;
+      iframe.width = "100%";
+      iframe.height = "600px";
+      document.getElementById("resultadoAlgoritmo").appendChild(iframe);
+    })
+    .catch((error) => {
+      ocultarSpinnerMap();
+      console.error("Error al obtener datos:", error);
+    });
 }
 
-// function mostrarSpinner() {
-//   const loadingDiv = document.getElementById("loadingDiv");
-//   loadingDiv.style.setProperty("display", "flex", "important");
-// }
-
-// function ocultarSpinner() {
-//   const loadingDiv = document.getElementById("loadingDiv");
-//   loadingDiv.style.setProperty("display", "none", "important");
-// }
 
 function mostrarSpinnerMap() {
   const loadingMap = document.getElementById("loadingMap");
