@@ -213,6 +213,7 @@ def algoritmo_del_viajero_app():
             "mapPath": map_path
         })
     except Exception as e:
+        print(f"Error: {e}")  # Imprime el error en la consola
         return jsonify({"error": str(e)}), 500
     
 @app.route('/algoritmo-aleatorio', methods=['GET'])
@@ -228,6 +229,7 @@ def algoritmo_aleatorio_app():
             "mapPath": map_path
         })
     except Exception as e:
+        print(f"Error: {e}")  # Imprime el error en la consola
         return jsonify({"error": str(e)}), 500
 
 @app.route('/algoritmo-secuencial', methods=['GET'])
@@ -243,6 +245,7 @@ def algoritmo_secuencial_app():
             "mapPath": map_path
         })
     except Exception as e:
+        print(f"Error: {e}")  # Imprime el error en la consola
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
