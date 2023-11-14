@@ -92,6 +92,66 @@ def algoritmo_del_viajero(matriz_distancias):
 
     return mejor_ruta, mejor_longitud
 
+# --------------------- ALGORITMO Aleatorio ---------------------
+
+import random
+
+def tsp_aleatorio(distancias):
+    ciudades = list(range(len(distancias)))
+    random.shuffle(ciudades)
+    costo_total = 0
+    camino = []
+
+    for i in range(len(ciudades) - 1):
+        ciudad_actual = ciudades[i]
+        siguiente_ciudad = ciudades[i + 1]
+        costo_actual = distancias[ciudad_actual][siguiente_ciudad]
+        costo_total += costo_actual
+        camino.append(ciudad_actual)
+
+    # Volver a la ciudad inicial
+    ciudad_inicial = ciudades[-1]
+    ciudad_final = ciudades[0]
+    costo_final = distancias[ciudad_inicial][ciudad_final]
+    costo_total += costo_final
+    camino.append(ciudad_final)
+
+    return camino, costo_total
+#   Este algoritmo simplemente permuta aleatoriamente las ciudades y calcula el costo total del recorrido. 
+# Debido a su enfoque aleatorio, no garantiza una solución óptima en absoluto y 
+# generalmente producirá soluciones muy subóptimas para instancias más grandes del problema del TSP. 
+# Es importante destacar que este algoritmo no es una solución viable para resolver el TSP en la práctica, pero puede servir como un ejemplo de un enfoque no efectivo.
+
+#--------------------------- Algoritmo Secuencial-------------------------------------------
+def tsp_secuencial(distancias):
+    num_ciudades = len(distancias)
+    camino = list(range(num_ciudades))
+    costo_total = 0
+
+    for i in range(num_ciudades - 1):
+        costo_total += distancias[camino[i]][camino[i + 1]]
+
+    # Incluir el costo de volver a la ciudad inicial
+    costo_total += distancias[camino[-1]][camino[0]]
+    return camino, costo_total
+
+@app.route('/algoritmo-secuencial', methods=['GET'])
+def algoritmo_secuencial_app():
+    try:
+        global ciudadesAUtilizar, matrizDistanciasGlobal
+        camino, distanciaTotal = tsp_secuencial(matrizDistanciasGlobal)
+        coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
+        map_path = generar_mapa(camino, coordenadasCiudades)
+        return jsonify({
+            "camino": [ciudadesAUtilizar[i] for i in camino],
+            "distanciaTotal": distanciaTotal,
+            "mapPath": map_path
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Recorre las ciudades en el sentido que se van marcando   
+# -------------------------------------------------------------------
 # --------------------- FUNCIONES DE MAPA ---------------------
 
 def generar_mapa(camino, coordenadasCiudades):
