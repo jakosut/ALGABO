@@ -97,24 +97,27 @@ def algoritmo_del_viajero(matriz_distancias):
 # --------------------- ALGORITMO Aleatorio ---------------------
 
 def tsp_aleatorio(distancias):
-    ciudades = list(range(len(distancias)))
+    num_ciudades = len(distancias)
+    ciudades = list(range(num_ciudades))
     random.shuffle(ciudades)
     costo_total = 0
     camino = []
 
-    for i in range(len(ciudades) - 1):
+    for i in range(num_ciudades - 1):
         ciudad_actual = ciudades[i]
         siguiente_ciudad = ciudades[i + 1]
         costo_actual = distancias[ciudad_actual][siguiente_ciudad]
         costo_total += costo_actual
         camino.append(ciudad_actual)
 
+    # Agregar la última ciudad al camino
+    ultima_ciudad = ciudades[-1]
+    camino.append(ultima_ciudad)
+
     # Volver a la ciudad inicial
-    ciudad_inicial = ciudades[-1]
     ciudad_final = ciudades[0]
-    costo_final = distancias[ciudad_inicial][ciudad_final]
+    costo_final = distancias[ultima_ciudad][ciudad_final]
     costo_total += costo_final
-    camino.append(ciudad_final)
 
     return camino, costo_total
 #  Este algoritmo simplemente permuta aleatoriamente las ciudades y calcula el costo total del recorrido. 
