@@ -231,6 +231,45 @@ def algoritmo_genetico(matriz_distancias, tamano_poblacion, tasa_mutacion, gener
     mejor_distancia = calcular_distancia_indices(mejor_ruta, matriz_distancias)
     return mejor_ruta, mejor_distancia
 
+# --------------------- ALGORITMO DEL VIAJERO CON PROGRAMACIÓN DINÁMICA ---------------------
+
+#Este algoritmo de programación dinámica busca la solución óptima para el TSP, evitando la redundancia al almacenar resultados intermedios en la tabla dp_table.
+
+# Esta función toma como entrada una matriz de distancias entre ciudades y devuelve la ruta óptima y su longitud.
+def tsp_dinamico(matriz_distancias):
+    num_ciudades = len(matriz_distancias)
+    dp_table = [[float('inf')] * num_ciudades for _ in range(1 << num_ciudades)]
+
+    # Inicializar la tabla para casos base.
+    # La tabla se inicializa con los casos base donde solo se ha visitado una ciudad.
+    for i in range(num_ciudades):
+        dp_table[1 << i][i] = 0
+
+    # Llenar la tabla dinámica
+    for mask in range(1, 1 << num_ciudades):
+        for u in range(num_ciudades):
+            if (mask >> u) & 1:  # Si la ciudad u está en el subconjunto representado por la máscara
+                for v in range(num_ciudades):
+                    if (mask >> v) & 1 and u != v:  # Si la ciudad v también está en el subconjunto y u != v
+                        dp_table[mask][u] = min(dp_table[mask][u], dp_table[mask ^ (1 << u)][v] + matriz_distancias[v][u])
+
+    # Construir la ruta óptima. Se utiliza la información almacenada en la tabla para construir la ruta óptima.
+    ruta_optima = []
+    mask = (1 << num_ciudades) - 1
+    u = min(range(num_ciudades), key=lambda x: dp_table[mask][x])
+    ruta_optima.append(u)
+
+    for _ in range(num_ciudades - 1):
+        v = min(range(num_ciudades), key=lambda x: dp_table[mask][x] + matriz_distancias[u][x])
+        ruta_optima.append(v)
+        mask ^= 1 << v
+        u = v
+
+    # Calcular la longitud total de la ruta óptima
+    longitud_optima = dp_table[(1 << num_ciudades) - 1][ruta_optima[-1]]
+
+    return ruta_optima, longitud_optima
+
 # --------------------- FUNCIONES DE MAPA ---------------------
 
 def generar_mapa(camino, coordenadasCiudades):
@@ -335,6 +374,21 @@ def ruta_algoritmo_genetico():
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
     
+@app.route('/programacion-dinamica', methods=['GET'])
+def tsp_dinamico_app():
+    try:
+        global ciudadesAUtilizar, matrizDistanciasGlobal
+        camino, distanciaTotal = tsp_dinamico(matrizDistanciasGlobal)
+        coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
+        map_path = generar_mapa(camino, coordenadasCiudades)
+        return jsonify({
+            "camino": [ciudadesAUtilizar[i] for i in camino],
+            "distanciaTotal": distanciaTotal,
+            "mapPath": map_path
+        })
+    except Exception as e:
+        print(f"Error: {e}")  # Imprime el error en la consola
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

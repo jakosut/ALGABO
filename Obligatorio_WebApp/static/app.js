@@ -102,6 +102,9 @@ function generarMapa() {
     case "opcion4":
       url = "/algoritmo-genetico";
       break;
+    case "opcion5":
+      url = "/programacion-dinamica";
+      break;
     default:
       console.error("Algoritmo no seleccionado");
       return;
