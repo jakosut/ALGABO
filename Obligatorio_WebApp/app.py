@@ -86,7 +86,7 @@ def obtener_coordenadas(ciudad):
 def calcular_distancia(ciudad1, ciudad2, matriz_distancias):
     return matriz_distancias[ciudad1][ciudad2]
 
-# --------------------- ALGORITMO DEL VIAJERO ---------------------
+# --------------------- ALGORITMO DEL VIAJERO POR FUERZA BRUTA ---------------------
 
 def calcular_longitud_ruta(ruta, matriz_distancias):
     longitud = 0
@@ -108,6 +108,45 @@ def algoritmo_del_viajero(matriz_distancias):
             mejor_ruta = ruta
 
     return mejor_ruta, mejor_longitud
+
+# --------------------- ALGORITMO DEL VIAJERO CON PROGRAMACIÓN DINÁMICA ---------------------
+
+#Este algoritmo de programación dinámica busca la solución óptima para el TSP, evitando la redundancia al almacenar resultados intermedios en la tabla dp_table.
+
+# Esta función toma como entrada una matriz de distancias entre ciudades y devuelve la ruta óptima y su longitud.
+def tsp_dinamico(matriz_distancias):
+    num_ciudades = len(matriz_distancias)
+    dp_table = [[float('inf')] * num_ciudades for _ in range(1 << num_ciudades)]
+
+    # Inicializar la tabla para casos base.
+    # La tabla se inicializa con los casos base donde solo se ha visitado una ciudad.
+    for i in range(num_ciudades):
+        dp_table[1 << i][i] = 0
+
+    # Llenar la tabla dinámica
+    for mask in range(1, 1 << num_ciudades):
+        for u in range(num_ciudades):
+            if (mask >> u) & 1:  # Si la ciudad u está en el subconjunto representado por la máscara
+                for v in range(num_ciudades):
+                    if (mask >> v) & 1 and u != v:  # Si la ciudad v también está en el subconjunto y u != v
+                        dp_table[mask][u] = min(dp_table[mask][u], dp_table[mask ^ (1 << u)][v] + matriz_distancias[v][u])
+
+    # Construir la ruta óptima. Se utiliza la información almacenada en la tabla para construir la ruta óptima.
+    ruta_optima = []
+    mask = (1 << num_ciudades) - 1
+    u = min(range(num_ciudades), key=lambda x: dp_table[mask][x])
+    ruta_optima.append(u)
+
+    for _ in range(num_ciudades - 1):
+        v = min(range(num_ciudades), key=lambda x: dp_table[mask][x] + matriz_distancias[u][x])
+        ruta_optima.append(v)
+        mask ^= 1 << v
+        u = v
+
+    # Calcular la longitud total de la ruta óptima
+    longitud_optima = dp_table[(1 << num_ciudades) - 1][ruta_optima[-1]]
+
+    return ruta_optima, longitud_optima
 
 # --------------------- ALGORITMO Aleatorio ---------------------
 
