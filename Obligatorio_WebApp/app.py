@@ -158,7 +158,6 @@ def tsp_secuencial(distancias):
 #--------------------------- Algoritmo Genetico ---------------------------
 
 def crear_ruta(num_ciudades):
-    #Crea una ruta aleatoria.
     return random.sample(range(num_ciudades), num_ciudades)
 
 def calcular_distancia_indices(ruta, matriz_distancias):
@@ -194,14 +193,12 @@ def cruce(padre1, padre2, matriz_distancias):
     # Añadir ciudades faltantes
     for ciudad in range(longitud_ruta):
         if ciudad not in ciudades_incluidas:
-            # Aquí puedes elegir dónde insertar la ciudad faltante.
             hijo.append(ciudad)
 
     return hijo
 
 
 def mutar(ruta, tasa_mutacion):
-    # Realiza una mutación aleatoria en una ruta.
     for i in range(len(ruta)):
         if random.random() < tasa_mutacion:
             j = int(random.random() * len(ruta))
@@ -209,7 +206,6 @@ def mutar(ruta, tasa_mutacion):
     return ruta
 
 def siguiente_generacion(generacion_actual, tasa_mutacion, matriz_distancias):
-    # Crea la siguiente generación. 
     aptitud = [1 / calcular_distancia_indices(ruta, matriz_distancias) for ruta in generacion_actual]
     padres = seleccionar_padres(generacion_actual, aptitud)
     descendientes = []
@@ -225,7 +221,6 @@ def siguiente_generacion(generacion_actual, tasa_mutacion, matriz_distancias):
     return siguiente_gen
 
 def algoritmo_genetico(matriz_distancias, tamano_poblacion, tasa_mutacion, generaciones):
-    # Ejecuta el algoritmo genético. 
     num_ciudades = len(matriz_distancias)
     poblacion = [crear_ruta(num_ciudades) for _ in range(tamano_poblacion)]
 
