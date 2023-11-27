@@ -99,6 +99,9 @@ function generarMapa() {
     case "opcion3":
       url = "/algoritmo-secuencial";
       break;
+    case "opcion4":
+      url = "/algoritmo-genetico";
+      break;
     default:
       console.error("Algoritmo no seleccionado");
       return;
@@ -167,3 +170,5 @@ function ocultarSpinnerMatrix() {
   const loadingMatrix = document.getElementById("loadingMatrix");
   loadingMatrix.style.setProperty("display", "none", "important");
 }
+
+

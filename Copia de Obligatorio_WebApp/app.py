@@ -5,12 +5,16 @@ from flask import send_from_directory
 import itertools
 import math
 import random
+import threading
+
 
 
 app = Flask(__name__)
 
 ciudadesAUtilizar = []
 matrizDistanciasGlobal = []
+
+resultados_algoritmo = {}
 
 matrizDistanciasCompleta = [
     [0, 550.0507, 385.6796, 658.8347, 412.2516, 452.2856, 500.6593, 616.5653, 695.2045, 599.0939, 324.8104, 482.7064, 111.0888, 668.2785, 209.4704, 549.119, 503.2997, 206.1982, 500.1558],
@@ -78,15 +82,71 @@ coordenadasCiudades = {
     "Treinta y Tres": {"latitud": -33.2333, "longitud": -54.3833}
 }
 
-# --------------------- FUNCIONES DE COORDENADAS Y DISTANCIAS ---------------------
+
+#--------------------------- FUNCIONES DE COORDENADAS Y DISTANCIAS ---------------------------
 
 def obtener_coordenadas(ciudad):
     return coordenadasCiudades.get(ciudad, {"nombre": ciudad, "latitud": None, "longitud": None})
 
+
+# Función para obtener las coordenadas de las ciudades
+# def obtener_coordenadas(ciudad):
+#     base_url = "https://nominatim.openstreetmap.org/search"
+#     parametros = {
+#         "city": ciudad,
+#         "format": "json"
+#     }
+
+#     respuesta = requests.get(base_url, params=parametros)
+    
+#     if respuesta.status_code != 200:
+#         raise Exception(f"Error al obtener datos de Nominatim para la ciudad {ciudad}")
+    
+#     datos = respuesta.json()
+#     for lugar in datos:
+#         if es_ciudad_en_uruguay(lugar.get("display_name", "")):
+#             return {
+#                 "nombre": ciudad,
+#                 "latitud": float(lugar["lat"]),
+#                 "longitud": float(lugar["lon"])
+#             }
+
+#     return {
+#         "nombre": ciudad,
+#         "latitud": None,
+#         "longitud": None
+#     }
+
+# def es_ciudad_en_uruguay(display_name):
+#     name = display_name.split(",")
+#     pais = name[-1].strip()
+#     return pais == "Uruguay"
+
+# def obtener_distancia_osrm(coord1, coord2):
+
+#     base_url = "http://router.project-osrm.org/route/v1/driving"
+#     coordenadas_ruta = f"{coord1['longitud']},{coord1['latitud']};{coord2['longitud']},{coord2['latitud']}"
+#     url_completa = f"{base_url}/{coordenadas_ruta}?overview=false"
+    
+#     # Solicita la información de distancia al servicio OSRM usando la URL completa
+#     respuesta = requests.get(url_completa)
+#     data = respuesta.json()
+
+#     # Verifica si la respuesta tiene la información que necesitamos
+#     if 'routes' not in data:
+#         raise Exception(f"Error al obtener ruta entre {coord1} y {coord2}")
+
+#     # Extrae la distancia de la respuesta. Está en metros, así que la convertimos a kilómetros
+#     distancia_en_metros = data['routes'][0]['distance']
+#     distancia_en_kilometros = distancia_en_metros / 1000
+    
+#     # Devuelve la distancia en kilómetros
+#     return distancia_en_kilometros
+
 def calcular_distancia(ciudad1, ciudad2, matriz_distancias):
     return matriz_distancias[ciudad1][ciudad2]
 
-# --------------------- ALGORITMO DEL VIAJERO ---------------------
+#--------------------------- Algoritmo del Viajero ---------------------------
 
 def calcular_longitud_ruta(ruta, matriz_distancias):
     longitud = 0
@@ -109,8 +169,11 @@ def algoritmo_del_viajero(matriz_distancias):
 
     return mejor_ruta, mejor_longitud
 
-# --------------------- ALGORITMO Aleatorio ---------------------
-
+#--------------------------- Algoritmo Aleatorio ---------------------------
+#  Este algoritmo simplemente permuta aleatoriamente las ciudades y calcula el costo total del recorrido. 
+# Debido a su enfoque aleatorio, no garantiza una solución óptima en absoluto y 
+# generalmente producirá soluciones muy subóptimas para instancias más grandes del problema del TSP. 
+# Es importante destacar que este algoritmo no es una solución viable para resolver el TSP en la práctica, pero puede servir como un ejemplo de un enfoque no efectivo.
 def tsp_aleatorio(distancias):
     num_ciudades = len(distancias)
     ciudades = list(range(num_ciudades))
@@ -135,12 +198,9 @@ def tsp_aleatorio(distancias):
     costo_total += costo_final
 
     return camino, costo_total
-#  Este algoritmo simplemente permuta aleatoriamente las ciudades y calcula el costo total del recorrido. 
-# Debido a su enfoque aleatorio, no garantiza una solución óptima en absoluto y 
-# generalmente producirá soluciones muy subóptimas para instancias más grandes del problema del TSP. 
-# Es importante destacar que este algoritmo no es una solución viable para resolver el TSP en la práctica, pero puede servir como un ejemplo de un enfoque no efectivo.
 
-#--------------------------- Algoritmo Secuencial-------------------------------------------
+#--------------------------- Algoritmo Secuencial ---------------------------
+# Recorre las ciudades en el sentido que se van marcando   
 def tsp_secuencial(distancias):
     num_ciudades = len(distancias)
     camino = list(range(num_ciudades))
@@ -153,8 +213,6 @@ def tsp_secuencial(distancias):
     costo_total += distancias[camino[-1]][camino[0]]
     return camino, costo_total
 
-# Recorre las ciudades en el sentido que se van marcando   
-# -------------------------------------------------------------------
 #--------------------------- Algoritmo Genetico ---------------------------
 
 def crear_ruta(num_ciudades):
@@ -276,21 +334,87 @@ def seleccionarCiudades():
         "matrix": matrizDistanciasGlobal
     })
 
-@app.route('/algoritmo-del-viajero', methods=['GET'])
-def algoritmo_del_viajero_app():
+# @app.route('/seleccionar-ciudades', methods=['POST'])
+# def seleccionarCiudades():
+#     global ciudadesAUtilizar, matrizDistanciasGlobal
+#     ciudadesAUtilizar = request.json.get('selectedCities', [])
+    
+#     # Obteniendo coordenadas
+#     coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
+
+#     # Crear una matriz de distancias
+#     numCiudades = len(ciudadesAUtilizar)
+#     matrizDistancias = []
+
+#     # Recorre cada ciudad para crear las filas de la matriz
+#     for i in range(numCiudades):
+#         # Crea una fila vacía para la matriz
+#         fila = []
+#         # Recorre nuevamente cada ciudad para llenar la fila con valores de distancia (inicialmente 0.0)
+#         for j in range(numCiudades):
+#             fila.append(0.0)
+#         # Añade la fila completa a la matriz
+#         matrizDistancias.append(fila)
+
+#     # Llenar la matriz con las distancias entre cada par de ciudades
+#     for i, ciudad1 in enumerate(coordenadasCiudades):
+#         for j, ciudad2 in enumerate(coordenadasCiudades):
+#             if i < j:  # Evita comparar la ciudad consigo misma y repetir pares
+#                 distancia = obtener_distancia_osrm(ciudad1, ciudad2)
+#                 matrizDistancias[i][j] = distancia
+#                 matrizDistancias[j][i] = distancia  # La matriz es simétrica
+
+#     matrizDistanciasGlobal = matrizDistancias
+
+#     return jsonify({
+#         "message": "Ciudades seleccionadas y distancias calculadas correctamente",
+#         "selectedCities": ciudadesAUtilizar,
+#         "matrix": matrizDistancias
+#     })
+
+##################################################
+def ejecutar_algoritmo_en_hilo():
+    global ciudadesAUtilizar, matrizDistanciasGlobal, resultados_algoritmo
     try:
-        global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
         map_path = generar_mapa(camino, coordenadasCiudades)
-        return jsonify({
+        resultados_algoritmo = {
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
             "mapPath": map_path
-        })
+        }
     except Exception as e:
-        print(f"Error: {e}")  # Imprime el error en la consola
-        return jsonify({"error": str(e)}), 500
+        print(f"Error en el hilo: {e}")
+
+@app.route('/algoritmo-del-viajero', methods=['GET'])
+def algoritmo_del_viajero_app():
+    threading.Thread(target=ejecutar_algoritmo_en_hilo).start()
+    return jsonify({"message": "Algoritmo del viajero iniciado"})
+
+@app.route('/obtener-resultados', methods=['GET'])
+def obtener_resultados():
+    if resultados_algoritmo:
+        return jsonify(resultados_algoritmo)
+    else:
+        return jsonify({"message": "Resultados aún no disponibles"}), 202
+
+#################################################
+# @app.route('/algoritmo-del-viajero', methods=['GET'])
+# def algoritmo_del_viajero_app():
+#     try:
+#         global ciudadesAUtilizar, matrizDistanciasGlobal
+#         camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
+#         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
+#         map_path = generar_mapa(camino, coordenadasCiudades)
+#         return jsonify({
+#             "camino": [ciudadesAUtilizar[i] for i in camino],
+#             "distanciaTotal": distanciaTotal,
+#             "mapPath": map_path
+#         })
+#     except Exception as e:
+#         print(f"Error: {e}")  # Imprime el error en la consola
+#         return jsonify({"error": str(e)}), 500
     
 @app.route('/algoritmo-aleatorio', methods=['GET'])
 def algoritmo_aleatorio_app():
@@ -328,7 +452,7 @@ def algoritmo_secuencial_app():
 def ruta_algoritmo_genetico():
     try:
         global ciudadesAUtilizar, matrizDistanciasGlobal
-        camino, distanciaTotal = algoritmo_genetico(matrizDistanciasGlobal, 300, 0.01, 1000)
+        camino, distanciaTotal = algoritmo_genetico(matrizDistanciasGlobal, 100, 0.01, 50)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
         map_path = generar_mapa(camino, coordenadasCiudades)
         return jsonify({
@@ -340,6 +464,5 @@ def ruta_algoritmo_genetico():
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
     
-
 if __name__ == '__main__':
     app.run(debug=True)
