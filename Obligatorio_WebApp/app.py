@@ -238,37 +238,37 @@ def algoritmo_genetico(matriz_distancias, tamano_poblacion, tasa_mutacion, gener
 # Esta función toma como entrada una matriz de distancias entre ciudades y devuelve la ruta óptima y su longitud.
 def tsp_dinamico(matriz_distancias):
     num_ciudades = len(matriz_distancias)
-    dp_table = [[float('inf')] * num_ciudades for _ in range(1 << num_ciudades)]
+    # Memoización para almacenar resultados ya calculados
+    memo = {}
 
-    # Inicializar la tabla para casos base.
-    # La tabla se inicializa con los casos base donde solo se ha visitado una ciudad.
-    for i in range(num_ciudades):
-        dp_table[1 << i][i] = 0
+    # Función recursiva interna para calcular el camino óptimo
+    def recorrer(conjunto, ultimo_nodo):
+        # Verificar si ya hemos calculado este conjunto y último nodo
+        if (tuple(conjunto), ultimo_nodo) in memo:
+            return memo[(tuple(conjunto), ultimo_nodo)]
 
-    # Llenar la tabla dinámica
-    for mask in range(1, 1 << num_ciudades):
-        for u in range(num_ciudades):
-            if (mask >> u) & 1:  # Si la ciudad u está en el subconjunto representado por la máscara
-                for v in range(num_ciudades):
-                    if (mask >> v) & 1 and u != v:  # Si la ciudad v también está en el subconjunto y u != v
-                        dp_table[mask][u] = min(dp_table[mask][u], dp_table[mask ^ (1 << u)][v] + matriz_distancias[v][u])
+        # Caso base: si el conjunto está vacío, retornar la distancia al nodo inicial
+        if not conjunto:
+            return matriz_distancias[ultimo_nodo][0]
 
-    # Construir la ruta óptima. Se utiliza la información almacenada en la tabla para construir la ruta óptima.
-    ruta_optima = []
-    mask = (1 << num_ciudades) - 1
-    u = min(range(num_ciudades), key=lambda x: dp_table[mask][x])
-    ruta_optima.append(u)
+        # Calcular las distancias para los subconjuntos restantes y encontrar el mínimo
+        distancias = []
+        for prox_nodo in conjunto:
+            nuevo_conjunto = conjunto - {prox_nodo}
+            distancia = matriz_distancias[ultimo_nodo][prox_nodo] + recorrer(nuevo_conjunto, prox_nodo)
+            distancias.append(distancia)
 
-    for _ in range(num_ciudades - 1):
-        v = min(range(num_ciudades), key=lambda x: dp_table[mask][x] + matriz_distancias[u][x])
-        ruta_optima.append(v)
-        mask ^= 1 << v
-        u = v
+        # Almacenar el resultado en la memoización y retornarlo
+        resultado = min(distancias)
+        memo[(tuple(conjunto), ultimo_nodo)] = resultado
+        return resultado
 
-    # Calcular la longitud total de la ruta óptima
-    longitud_optima = dp_table[(1 << num_ciudades) - 1][ruta_optima[-1]]
+    # Iniciar el recorrido con el conjunto completo y el nodo inicial
+    conjunto_completo = set(range(0, num_ciudades))
+    longitud_optima = recorrer(conjunto_completo, 0)
 
-    return ruta_optima, longitud_optima
+    # Reconstruir el camino óptimo
+    return conjunto_completo, longitud_optima
 
 # --------------------- FUNCIONES DE MAPA ---------------------
 
