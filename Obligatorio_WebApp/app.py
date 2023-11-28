@@ -316,7 +316,7 @@ def algoritmo_del_viajero_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo_del_viajero_Distancia:_" +  str(distanciaTotal))
+        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo_del_viajero_Distancia_" +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -332,7 +332,7 @@ def algoritmo_aleatorio_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = tsp_aleatorio(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo_del_viajero_Distancia:_" +  str(distanciaTotal))
+        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo_Aleatorio_Distancia_" +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -348,7 +348,7 @@ def algoritmo_secuencial_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = tsp_secuencial(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo_del_viajero_Distancia:_" +  str(distanciaTotal))
+        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo_Secuencial_Distancia_" +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -364,7 +364,7 @@ def ruta_algoritmo_genetico():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_genetico(matrizDistanciasGlobal, 300, 0.01, 1000)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo_del_viajero_Distancia:_" +  str(distanciaTotal))
+        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo_Genetico_Distancia_" +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -380,7 +380,7 @@ def tsp_dinamico_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = tsp_dinamico(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo_del_viajero_Distancia:_" +  str(distanciaTotal))
+        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo_ProgDinamica_Distancia_" +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
