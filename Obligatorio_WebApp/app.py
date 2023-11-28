@@ -316,7 +316,7 @@ def algoritmo_del_viajero_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo_del_viajero:_Distancia:_" +  str(distanciaTotal))
+        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo_del_viajero_Distancia:_" +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
