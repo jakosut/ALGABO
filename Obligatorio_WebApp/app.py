@@ -272,7 +272,7 @@ def tsp_dinamico(matriz_distancias):
 
 # --------------------- FUNCIONES DE MAPA ---------------------
 
-def generar_mapa(camino, coordenadasCiudades):
+def generar_mapa(camino, coordenadasCiudades,nombre_mapa):
     m = folium.Map(location=[-32.5, -56], zoom_start=7)
 
     # Agregar puntos al mapa
@@ -285,7 +285,7 @@ def generar_mapa(camino, coordenadasCiudades):
     folium.PolyLine([(coord['latitud'], coord['longitud']) for coord in route], color="red", weight=2.5, opacity=1).add_to(m)
 
     # Guardar el mapa en un archivo HTML
-    map_path = "static/uruguay_map.html"
+    map_path = f"static/{nombre_mapa}.html"
     m.save(map_path)
     return map_path
 
@@ -316,7 +316,7 @@ def algoritmo_del_viajero_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_del_viajero(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades)
+        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo del viajero: Distancia: " +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -332,7 +332,7 @@ def algoritmo_aleatorio_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = tsp_aleatorio(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades)
+        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo Aleatorio: Distancia: " +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -348,7 +348,7 @@ def algoritmo_secuencial_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = tsp_secuencial(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades)
+        map_path = generar_mapa(camino, coordenadasCiudades, "Algoritmo secuencial: Distancia: " +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -364,7 +364,7 @@ def ruta_algoritmo_genetico():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = algoritmo_genetico(matrizDistanciasGlobal, 300, 0.01, 1000)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades)
+        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo Genetico: Distancia: " +  str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
@@ -380,7 +380,7 @@ def tsp_dinamico_app():
         global ciudadesAUtilizar, matrizDistanciasGlobal
         camino, distanciaTotal = tsp_dinamico(matrizDistanciasGlobal)
         coordenadasCiudades = [obtener_coordenadas(ciudad) for ciudad in ciudadesAUtilizar]
-        map_path = generar_mapa(camino, coordenadasCiudades)
+        map_path = generar_mapa(camino, coordenadasCiudades,"Algoritmo Dinamico: Distancia: " + str(distanciaTotal))
         return jsonify({
             "camino": [ciudadesAUtilizar[i] for i in camino],
             "distanciaTotal": distanciaTotal,
